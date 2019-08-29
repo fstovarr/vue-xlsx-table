@@ -3,12 +3,12 @@
     <button type="button" :class="className" @click="handleUploadBtnClick">
       <slot></slot>
     </button>
-    <input :ref="uploadInputId" type="file" :accept="accept" class="c-hide" @change="handkeFileChange">
+    <input :ref="uploadInputId" type="file" :accept="accept" class="c-hide" @change="handleFileChange">
   </div>
 </template>
 
 <script>
-import XLSX from 'xlsx'
+import XLSX from 'xlsx';
 
 export default {
   name: 'vue-xlsx-table',
@@ -18,7 +18,8 @@ export default {
       workbook: null,
       tableData: {
         header: [],
-        body: []
+        body: [],
+        original: null
       },
       uploadInputId: new Date().getUTCMilliseconds()
     }
@@ -39,18 +40,17 @@ export default {
     }
   },
   methods: {
-    handkeFileChange (e) {
-      if (this.rawFile !== null) {
+    handleFileChange (e) {
+      if (this.rawFile !== null)
         return
-      }
-      this.rawFile = e.target.files[0]
+      this.rawFile = e.target.files[0];
       this.fileConvertToWorkbook(this.rawFile)
         .then((workbook) => {
           let xlsxArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
           this.workbook = workbook
           this.initTable(
-            this.xlsxArrToTableArr(xlsxArr)
-          )
+            Object.assign({}, this.xlsxArrToTableArr(xlsxArr), {original: this.rawFile})
+          );
         })
         .catch((err) => {
           this.$emit('on-select-file', false)
@@ -60,13 +60,14 @@ export default {
     fileConvertToWorkbook (file) {
       let reader = new FileReader()
       let fixdata = (data) => {
-        let o = "", l = 0, w = 10240
-        for( ; l<data.byteLength/w ; ++l) {
+        let o = "", l = 0, w = 10240;
+        for( ; l<data.byteLength/w ; ++l)
           o += String.fromCharCode.apply(null,new Uint8Array(data.slice(l*w,l*w+w)))
-        }
-        o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l*w)))
-        return o
+
+        o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l*w)));
+        return o;
       }
+
       return new Promise((resolve, reject) => {
         try {
           reader.onload = (renderEvent) => {
@@ -125,15 +126,16 @@ export default {
       data.forEach((rowItem) => {
         tempObj = {}
         rowItem.forEach((item, index) => {
-          tempObj[header[index]] = item
+          tempObj[header[index]] = itemhandk
         })
         xlsxArr.push(tempObj)
       })
       return xlsxArr
     },
-    initTable ( {data, header} ) {
-      this.tableData.header = header
-      this.tableData.body = data
+    initTable ( {data, header, original} ) {
+      this.tableData.header = header;
+      this.tableData.body = data;
+      this.tableData.original = original;
       this.$emit('on-select-file', this.tableData)
     },
     handleUploadBtnClick () {

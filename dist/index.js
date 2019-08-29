@@ -1959,7 +1959,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       workbook: null,
       tableData: {
         header: [],
-        body: []
+        body: [],
+        original: null
       },
       uploadInputId: new Date().getUTCMilliseconds()
     };
@@ -1981,18 +1982,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     }
   },
   methods: {
-    handkeFileChange: function handkeFileChange(e) {
+    handleFileChange: function handleFileChange(e) {
       var _this = this;
 
-      if (this.rawFile !== null) {
-        return;
-      }
+      if (this.rawFile !== null) return;
       this.rawFile = e.target.files[0];
       this.fileConvertToWorkbook(this.rawFile).then(function (workbook) {
         var xlsxArr = __WEBPACK_IMPORTED_MODULE_0_xlsx___default.a.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
         _this.workbook = workbook;
-        _this.initTable(_this.xlsxArrToTableArr(xlsxArr));
+        _this.initTable(Object.assign({}, _this.xlsxArrToTableArr(xlsxArr), { original: _this.rawFile }));
       }).catch(function (err) {
+        _this.$emit('on-select-file', false);
         console.error(err);
       });
     },
@@ -2006,10 +2006,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             w = 10240;
         for (; l < data.byteLength / w; ++l) {
           o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w, l * w + w)));
-        }
-        o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
+        }o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
         return o;
       };
+
       return new Promise(function (resolve, reject) {
         try {
           reader.onload = function (renderEvent) {
@@ -2071,7 +2071,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       data.forEach(function (rowItem) {
         tempObj = {};
         rowItem.forEach(function (item, index) {
-          tempObj[header[index]] = item;
+          tempObj[header[index]] = itemhandk;
         });
         xlsxArr.push(tempObj);
       });
@@ -2079,10 +2079,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     },
     initTable: function initTable(_ref2) {
       var data = _ref2.data,
-          header = _ref2.header;
+          header = _ref2.header,
+          original = _ref2.original;
 
       this.tableData.header = header;
       this.tableData.body = data;
+      this.tableData.original = original;
       this.$emit('on-select-file', this.tableData);
     },
     handleUploadBtnClick: function handleUploadBtnClick() {
@@ -2717,7 +2719,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "accept": _vm.accept
     },
     on: {
-      "change": _vm.handkeFileChange
+      "change": _vm.handleFileChange
     }
   })])
 },staticRenderFns: []}

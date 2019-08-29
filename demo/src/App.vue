@@ -14,7 +14,7 @@ export default {
   methods: {
     handleSelectedFile (convertedData) {
       console.log(convertedData)
-      window.alert(JSON.stringify(convertedData))
+      // window.alert(JSON.stringify(convertedData))
     }
   }
 }
