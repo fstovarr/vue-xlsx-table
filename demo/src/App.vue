@@ -2,7 +2,7 @@
   <div id="app">
     <h1>Vue-xlsx-table</h1>
     <p>Not need upload, view xlsx or xls file in your browser, Supported by js-xlsx.</p>
-    <vue-xlsx-table @on-select-file="handleSelectedFile">
+    <vue-xlsx-table @on-loaded-file="handleLoadedFile" @on-processed-file="handleProcessedFile" ref="table">
       Select one file
     </vue-xlsx-table>
   </div>
@@ -12,9 +12,13 @@
 export default {
   name: 'app',
   methods: {
-    handleSelectedFile (convertedData) {
-      console.log(convertedData)
-      // window.alert(JSON.stringify(convertedData))
+    handleProcessedFile(proccesedFile) {
+      console.log("Processed");
+      console.log(proccesedFile);
+    },
+    handleLoadedFile (file) {
+      console.log(file);
+      this.$refs.table.processFile();
     }
   }
 }

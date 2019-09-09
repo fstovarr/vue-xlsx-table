@@ -1983,16 +1983,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   methods: {
     handleFileChange: function handleFileChange(e) {
+      if (this.rawFile !== null) return;
+
+      this.rawFile = e.target.files[0];
+      this.$emit('on-loaded-file', this.rawFile);
+    },
+    processFile: function processFile() {
       var _this = this;
 
-      if (this.rawFile !== null) return;
-      this.rawFile = e.target.files[0];
       this.fileConvertToWorkbook(this.rawFile).then(function (workbook) {
         var xlsxArr = __WEBPACK_IMPORTED_MODULE_0_xlsx___default.a.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
         _this.workbook = workbook;
         _this.initTable(Object.assign({}, _this.xlsxArrToTableArr(xlsxArr), { original: _this.rawFile }));
       }).catch(function (err) {
-        _this.$emit('on-select-file', false);
+        _this.$emit('on-processed-file', false);
         console.error(err);
       });
     },
@@ -2085,7 +2089,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.tableData.header = header;
       this.tableData.body = data;
       this.tableData.original = original;
-      this.$emit('on-select-file', this.tableData);
+      this.$emit('on-processed-file', this.tableData);
     },
     handleUploadBtnClick: function handleUploadBtnClick() {
       this.clearAllData();

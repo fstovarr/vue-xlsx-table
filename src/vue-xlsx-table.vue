@@ -43,19 +43,19 @@ export default {
     handleFileChange (e) {
       if (this.rawFile !== null)
         return
+      
       this.rawFile = e.target.files[0];
-      this.fileConvertToWorkbook(this.rawFile)
-        .then((workbook) => {
-          let xlsxArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
-          this.workbook = workbook
-          this.initTable(
-            Object.assign({}, this.xlsxArrToTableArr(xlsxArr), {original: this.rawFile})
-          );
-        })
-        .catch((err) => {
-          this.$emit('on-select-file', false)
-          console.error(err)
-        })
+      this.$emit('on-loaded-file', this.rawFile);
+    },
+    processFile() {
+      this.fileConvertToWorkbook(this.rawFile).then((workbook) => {
+        let xlsxArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
+        this.workbook = workbook
+        this.initTable(this.xlsxArrToTableArr(xlsxArr));
+      }).catch((err) => {
+        this.$emit('on-processed-file', false);
+        console.error(err)
+      });
     },
     fileConvertToWorkbook (file) {
       let reader = new FileReader()
@@ -136,7 +136,7 @@ export default {
       this.tableData.header = header;
       this.tableData.body = data;
       this.tableData.original = original;
-      this.$emit('on-select-file', this.tableData)
+      this.$emit('on-processed-file', this.tableData);
     },
     handleUploadBtnClick () {
       this.clearAllData()
