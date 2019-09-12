@@ -1,18 +1,22 @@
 <template>
   <div class="vue-xlsx-container">
-    <button type="button" :class="className" @click="handleUploadBtnClick">
-      <slot></slot>
-    </button>
-    <input :ref="uploadInputId" type="file" :accept="accept" class="c-hide" @change="handleFileChange">
+    <slot :class="className" :load-file="handleUploadBtnClick"></slot>
+    <input
+      :ref="uploadInputId"
+      type="file"
+      :accept="accept"
+      class="c-hide"
+      @change="handleFileChange"
+    />
   </div>
 </template>
 
 <script>
-import XLSX from 'xlsx';
+import XLSX from "xlsx";
 
 export default {
-  name: 'vue-xlsx-table',
-  data () {
+  name: "vue-xlsx-table",
+  data() {
     return {
       rawFile: null,
       workbook: null,
@@ -22,146 +26,155 @@ export default {
         original: null
       },
       uploadInputId: new Date().getUTCMilliseconds()
-    }
+    };
   },
   props: {
     accept: {
       type: String,
-      default: '.xlsx, .xls'
+      default: ".xlsx, .xls"
     },
     className: {
       type: String,
-      default: 'xlsx-button'
+      default: "xlsx-button"
     }
   },
   computed: {
-    rABS () {
-      return window.xlsxEventBus.XLSX_EVENTS_DATA.options.rABS
+    rABS() {
+      return window.xlsxEventBus.XLSX_EVENTS_DATA.options.rABS;
     }
   },
   methods: {
-    handleFileChange (e) {
-      if (this.rawFile !== null)
-        return
-      
+    handleFileChange(e) {
+      if (this.rawFile !== null) return;
+
       this.rawFile = e.target.files[0];
-      this.$emit('on-loaded-file', this.rawFile);
+      this.$emit("on-loaded-file", this.rawFile);
     },
     processFile() {
-      this.fileConvertToWorkbook(this.rawFile).then((workbook) => {
-        let xlsxArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
-        this.workbook = workbook
-        this.initTable(this.xlsxArrToTableArr(xlsxArr));
-      }).catch((err) => {
-        this.$emit('on-processed-file', false);
-        console.error(err)
-      });
+      this.fileConvertToWorkbook(this.rawFile)
+        .then(workbook => {
+          let xlsxArr = XLSX.utils.sheet_to_json(
+            workbook.Sheets[workbook.SheetNames[0]]
+          );
+          this.workbook = workbook;
+          this.initTable(this.xlsxArrToTableArr(xlsxArr));
+        })
+        .catch(err => {
+          this.$emit("on-processed-file", false);
+          console.error(err);
+        });
     },
-    fileConvertToWorkbook (file) {
-      let reader = new FileReader()
-      let fixdata = (data) => {
-        let o = "", l = 0, w = 10240;
-        for( ; l<data.byteLength/w ; ++l)
-          o += String.fromCharCode.apply(null,new Uint8Array(data.slice(l*w,l*w+w)))
+    fileConvertToWorkbook(file) {
+      let reader = new FileReader();
+      let fixdata = data => {
+        let o = "",
+          l = 0,
+          w = 10240;
+        for (; l < data.byteLength / w; ++l)
+          o += String.fromCharCode.apply(
+            null,
+            new Uint8Array(data.slice(l * w, l * w + w))
+          );
 
-        o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l*w)));
+        o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
         return o;
-      }
+      };
 
       return new Promise((resolve, reject) => {
         try {
-          reader.onload = (renderEvent) => {
-            let data = renderEvent.target.result
-            if(this.rABS) {
+          reader.onload = renderEvent => {
+            let data = renderEvent.target.result;
+            if (this.rABS) {
               /* if binary string, read with type 'binary' */
-              resolve(XLSX.read(data, {type: 'binary'}))
+              resolve(XLSX.read(data, { type: "binary" }));
             } else {
               /* if array buffer, convert to base64 */
-              let arr = fixdata(data)
-              resolve(XLSX.read(btoa(arr), {type: 'base64'}))
+              let arr = fixdata(data);
+              resolve(XLSX.read(btoa(arr), { type: "base64" }));
             }
-          }
-          reader.onerror = (error) => {
-            reject(error)
-          }
+          };
+          reader.onerror = error => {
+            reject(error);
+          };
           if (this.rABS) {
-            reader.readAsBinaryString(file)
+            reader.readAsBinaryString(file);
           } else {
-            reader.readAsArrayBuffer(file)
+            reader.readAsArrayBuffer(file);
           }
         } catch (error) {
-          reject(error)
+          reject(error);
         }
-      })
+      });
     },
-    xlsxArrToTableArr (xlsxArr) {
-      let tableArr = []
-      let length = 0
-      let maxLength = 0
-      let maxLengthIndex = 0
+    xlsxArrToTableArr(xlsxArr) {
+      let tableArr = [];
+      let length = 0;
+      let maxLength = 0;
+      let maxLengthIndex = 0;
       xlsxArr.forEach((item, index) => {
-        length = Object.keys(item).length
+        length = Object.keys(item).length;
         if (maxLength < length) {
-          maxLength = length
-          maxLengthIndex = index
+          maxLength = length;
+          maxLengthIndex = index;
         }
-      })
-      let tableHeader = Object.keys(xlsxArr[maxLengthIndex])
-      let rowItem = {}
-      xlsxArr.forEach((item) => {
-        rowItem = {}
+      });
+      let tableHeader = Object.keys(xlsxArr[maxLengthIndex]);
+      let rowItem = {};
+      xlsxArr.forEach(item => {
+        rowItem = {};
         for (let i = 0; i < maxLength; i++) {
-          rowItem[tableHeader[i]] = item[tableHeader[i]] || ''
+          rowItem[tableHeader[i]] = item[tableHeader[i]] || "";
         }
-        tableArr.push(rowItem)
-      })
+        tableArr.push(rowItem);
+      });
       return {
         header: tableHeader,
         data: tableArr
-      }
+      };
     },
-    tableArrToXlsxArr ({data, header}) {
-      let xlsxArr = []
-      let tempObj = {}
-      data.forEach((rowItem) => {
-        tempObj = {}
+    tableArrToXlsxArr({ data, header }) {
+      let xlsxArr = [];
+      let tempObj = {};
+      data.forEach(rowItem => {
+        tempObj = {};
         rowItem.forEach((item, index) => {
-          tempObj[header[index]] = itemhandk
-        })
-        xlsxArr.push(tempObj)
-      })
-      return xlsxArr
+          tempObj[header[index]] = itemhandk;
+        });
+        xlsxArr.push(tempObj);
+      });
+      return xlsxArr;
     },
-    initTable ( {data, header, original} ) {
+    initTable({ data, header, original }) {
       this.tableData.header = header;
       this.tableData.body = data;
       this.tableData.original = original;
-      this.$emit('on-processed-file', this.tableData);
+      this.$emit("on-processed-file", this.tableData);
     },
-    handleUploadBtnClick () {
-      this.clearAllData()
-      this.$refs[this.uploadInputId].click()
+    handleUploadBtnClick() {
+      console.log("CLICKED");
+      this.clearAllData();
+      this.$refs[this.uploadInputId].click();
     },
-    clearAllData () {
-      this.$refs[this.uploadInputId].value = null
+    clearAllData() {
+      this.$refs[this.uploadInputId].value = null;
       this.tableData = {
         header: [],
         body: []
-      }
-      this.rawFile = null
-      this.workbook = null
+      };
+      this.rawFile = null;
+      this.workbook = null;
     }
   }
-}
+};
 </script>
 
 <style lang="less">
-.vue-xlsx-container{
+.vue-xlsx-container {
   display: inline-block;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  .c-hide{
+  .c-hide {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -184,11 +197,11 @@ export default {
   border-radius: 4px;
   color: #fff;
   background-color: #20a0ff;
-  &.button-large{
+  &.button-large {
     padding: 10px 15px;
     font-size: 14px;
   }
-  &.button-primary{
+  &.button-primary {
     color: #1f2d3d;
     border: 1px solid #bfcbd9;
     background-color: #fff;

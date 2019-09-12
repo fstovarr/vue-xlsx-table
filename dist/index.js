@@ -1948,11 +1948,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  name: 'vue-xlsx-table',
+  name: "vue-xlsx-table",
   data: function data() {
     return {
       rawFile: null,
@@ -1969,11 +1973,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   props: {
     accept: {
       type: String,
-      default: '.xlsx, .xls'
+      default: ".xlsx, .xls"
     },
     className: {
       type: String,
-      default: 'xlsx-button'
+      default: "xlsx-button"
     }
   },
   computed: {
@@ -1986,7 +1990,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       if (this.rawFile !== null) return;
 
       this.rawFile = e.target.files[0];
-      this.$emit('on-loaded-file', this.rawFile);
+      this.$emit("on-loaded-file", this.rawFile);
     },
     processFile: function processFile() {
       var _this = this;
@@ -1994,9 +1998,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.fileConvertToWorkbook(this.rawFile).then(function (workbook) {
         var xlsxArr = __WEBPACK_IMPORTED_MODULE_0_xlsx___default.a.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
         _this.workbook = workbook;
-        _this.initTable(Object.assign({}, _this.xlsxArrToTableArr(xlsxArr), { original: _this.rawFile }));
+        _this.initTable(_this.xlsxArrToTableArr(xlsxArr));
       }).catch(function (err) {
-        _this.$emit('on-processed-file', false);
+        _this.$emit("on-processed-file", false);
         console.error(err);
       });
     },
@@ -2020,11 +2024,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var data = renderEvent.target.result;
             if (_this2.rABS) {
               /* if binary string, read with type 'binary' */
-              resolve(__WEBPACK_IMPORTED_MODULE_0_xlsx___default.a.read(data, { type: 'binary' }));
+              resolve(__WEBPACK_IMPORTED_MODULE_0_xlsx___default.a.read(data, { type: "binary" }));
             } else {
               /* if array buffer, convert to base64 */
               var arr = fixdata(data);
-              resolve(__WEBPACK_IMPORTED_MODULE_0_xlsx___default.a.read(btoa(arr), { type: 'base64' }));
+              resolve(__WEBPACK_IMPORTED_MODULE_0_xlsx___default.a.read(btoa(arr), { type: "base64" }));
             }
           };
           reader.onerror = function (error) {
@@ -2057,7 +2061,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       xlsxArr.forEach(function (item) {
         rowItem = {};
         for (var i = 0; i < maxLength; i++) {
-          rowItem[tableHeader[i]] = item[tableHeader[i]] || '';
+          rowItem[tableHeader[i]] = item[tableHeader[i]] || "";
         }
         tableArr.push(rowItem);
       });
@@ -2089,9 +2093,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.tableData.header = header;
       this.tableData.body = data;
       this.tableData.original = original;
-      this.$emit('on-processed-file', this.tableData);
+      this.$emit("on-processed-file", this.tableData);
     },
     handleUploadBtnClick: function handleUploadBtnClick() {
+      console.log("CLICKED");
       this.clearAllData();
       this.$refs[this.uploadInputId].click();
     },
@@ -2707,15 +2712,9 @@ module.exports = function normalizeComponent (
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
     staticClass: "vue-xlsx-container"
-  }, [_c('button', {
-    class: _vm.className,
-    attrs: {
-      "type": "button"
-    },
-    on: {
-      "click": _vm.handleUploadBtnClick
-    }
-  }, [_vm._t("default")], 2), _vm._v(" "), _c('input', {
+  }, [_vm._t("default", null, {
+    loadFile: _vm.handleUploadBtnClick
+  }), _vm._v(" "), _c('input', {
     ref: _vm.uploadInputId,
     staticClass: "c-hide",
     attrs: {
@@ -2725,7 +2724,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     on: {
       "change": _vm.handleFileChange
     }
-  })])
+  })], 2)
 },staticRenderFns: []}
 
 /***/ }),
