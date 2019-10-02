@@ -2713,7 +2713,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   return _c('div', {
     staticClass: "vue-xlsx-container"
   }, [_vm._t("default", null, {
-    loadFile: _vm.handleUploadBtnClick
+    load: _vm.handleUploadBtnClick
   }), _vm._v(" "), _c('input', {
     ref: _vm.uploadInputId,
     staticClass: "c-hide",

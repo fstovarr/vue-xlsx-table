@@ -1,6 +1,6 @@
 <template>
   <div class="vue-xlsx-container">
-    <slot :class="className" :load-file="handleUploadBtnClick"></slot>
+    <slot :class="className" :load="handleUploadBtnClick"></slot>
     <input
       :ref="uploadInputId"
       type="file"
